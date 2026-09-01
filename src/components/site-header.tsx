@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronDown, Menu, Search, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Check, ChevronDown, Menu, Search, Truck, X } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Logo } from "@/components/ui/logo";
 import { Flag } from "@/components/ui/flag";
 import { SearchModal } from "@/components/search-modal";
@@ -30,6 +30,9 @@ export function SiteHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [languageOpen, setLanguageOpen] = useState(false);
+  const languageMenuRef = useRef<HTMLDivElement>(null);
+  const languageTriggerRef = useRef<HTMLButtonElement>(null);
+  const closeSearch = useCallback(() => setSearchOpen(false), []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(pathname !== "/" || window.scrollY > 24);
@@ -50,6 +53,34 @@ export function SiteHeader() {
     document.body.classList.toggle("modal-open", menuOpen);
     return () => document.body.classList.remove("modal-open");
   }, [menuOpen]);
+
+  useEffect(() => {
+    if (!languageOpen) return;
+    const closeOnOutsidePress = (event: PointerEvent) => {
+      if (!languageMenuRef.current?.contains(event.target as Node)) setLanguageOpen(false);
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      setLanguageOpen(false);
+      languageTriggerRef.current?.focus();
+    };
+    window.addEventListener("pointerdown", closeOnOutsidePress);
+    window.addEventListener("keydown", closeOnEscape);
+    return () => {
+      window.removeEventListener("pointerdown", closeOnOutsidePress);
+      window.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [languageOpen]);
+
+  const focusLanguageOption = (direction: 1 | -1) => {
+    window.requestAnimationFrame(() => {
+      const options = languageMenuRef.current?.querySelectorAll<HTMLButtonElement>("[role='option']");
+      if (!options?.length) return;
+      const selectedIndex = locales.indexOf(locale);
+      const nextIndex = direction === 1 ? selectedIndex : (selectedIndex - 1 + options.length) % options.length;
+      options[nextIndex]?.focus();
+    });
+  };
 
   return (
     <>
@@ -72,20 +103,29 @@ export function SiteHeader() {
             <button className="header-icon" onClick={() => setSearchOpen(true)} aria-label={t("search")}>
               <Search aria-hidden="true" />
             </button>
-            <div className="language-menu">
+            <div className="language-menu" ref={languageMenuRef}>
               <button
+                ref={languageTriggerRef}
                 className="language-trigger"
                 aria-expanded={languageOpen}
                 aria-haspopup="listbox"
+                aria-controls={languageOpen ? "language-options" : undefined}
                 onClick={() => setLanguageOpen((value) => !value)}
+                onKeyDown={(event) => {
+                  if (event.key !== "ArrowDown" && event.key !== "ArrowUp") return;
+                  event.preventDefault();
+                  setLanguageOpen(true);
+                  focusLanguageOption(event.key === "ArrowDown" ? 1 : -1);
+                }}
               >
                 <Flag locale={locale} />
                 <span>{localeNames[locale]}</span>
                 <ChevronDown aria-hidden="true" />
               </button>
               {languageOpen && (
-                <div className="language-list" role="listbox" aria-label={t("language")}>
-                  {locales.map((item) => (
+                <div className="language-list" id="language-options" role="listbox" aria-label={t("language")}>
+                  <span className="language-list-label">{t("language")}</span>
+                  {locales.map((item, index) => (
                     <button
                       key={item}
                       role="option"
@@ -93,17 +133,31 @@ export function SiteHeader() {
                       onClick={() => {
                         setLocale(item);
                         setLanguageOpen(false);
+                        languageTriggerRef.current?.focus();
+                      }}
+                      onKeyDown={(event) => {
+                        const options = languageMenuRef.current?.querySelectorAll<HTMLButtonElement>("[role='option']");
+                        if (!options?.length) return;
+                        let nextIndex = index;
+                        if (event.key === "ArrowDown") nextIndex = (index + 1) % options.length;
+                        else if (event.key === "ArrowUp") nextIndex = (index - 1 + options.length) % options.length;
+                        else if (event.key === "Home") nextIndex = 0;
+                        else if (event.key === "End") nextIndex = options.length - 1;
+                        else return;
+                        event.preventDefault();
+                        options[nextIndex]?.focus();
                       }}
                     >
                       <Flag locale={item} />
                       <span>{localeNames[item]}</span>
+                      <Check className="language-check" aria-hidden="true" />
                     </button>
                   ))}
                 </div>
               )}
             </div>
             <Link href={`${company.whatsapp}?text=${encodeURIComponent("Здравствуйте! Нужна консультация по спецтехнике.")}`} className="button button-small header-cta">
-              {t("consultation")} <span aria-hidden="true">↗</span>
+              <Truck aria-hidden="true" /> {t("consultation")}
             </Link>
             <button className="menu-button" onClick={() => setMenuOpen(true)} aria-label={t("menu")}>
               <Menu aria-hidden="true" />
@@ -145,7 +199,7 @@ export function SiteHeader() {
         </div>
       )}
 
-      <SearchModal open={searchOpen} onClose={() => setSearchOpen(false)} products={equipment} />
+      <SearchModal open={searchOpen} onClose={closeSearch} products={equipment} />
     </>
   );
 }

@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Manrope, Oswald } from "next/font/google";
 import { LanguageProvider } from "@/components/providers/language-provider";
 import "./globals.css";
+import "./premium.css";
 
 const manrope = Manrope({ variable: "--font-body", subsets: ["latin", "cyrillic"], display: "swap" });
 const oswald = Oswald({ variable: "--font-display", subsets: ["latin", "cyrillic"], display: "swap" });
@@ -23,7 +24,7 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image" },
 };
 
-export const viewport: Viewport = { width: "device-width", initialScale: 1, themeColor: "#0b0d0f" };
+export const viewport: Viewport = { width: "device-width", initialScale: 1, themeColor: "#111114" };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://edil-mashinalary.vercel.app";

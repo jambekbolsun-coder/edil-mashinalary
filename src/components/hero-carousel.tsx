@@ -39,7 +39,7 @@ export function HeroCarousel() {
   }, [playing]);
 
   return (
-    <section className="hero" aria-roledescription="carousel" aria-label="Предложения Edil Mashinalary">
+    <section className="hero" aria-roledescription="carousel" aria-label="Предложения Edil Mashinalary" onFocusCapture={() => setPlaying(false)}>
       <div className="hero-slides">
         {slides.map((slide, index) => (
           <div className="hero-slide" data-active={active === index} key={slide.image} aria-hidden={active !== index}>

@@ -80,7 +80,7 @@ export default async function HomePage() {
           <div className="blog-grid">
             {blogPosts.slice(0, 3).map((post) => (
               <article className="blog-card" key={post.slug}>
-                <Link href={`/blog/${post.slug}`} className="blog-image"><Image src={post.image} alt="" fill sizes="(max-width: 700px) 100vw, 33vw" /></Link>
+                <Link href={`/blog/${post.slug}`} className="blog-image" aria-label={`Читать: ${post.title}`}><Image src={post.image} alt="" fill sizes="(max-width: 700px) 100vw, 33vw" /></Link>
                 <div><span>{post.category} · {post.readTime}</span><h3><Link href={`/blog/${post.slug}`}>{post.title}</Link></h3><p>{post.excerpt}</p><Link className="text-link" href={`/blog/${post.slug}`}>Читать <ArrowUpRight aria-hidden="true" /></Link></div>
               </article>
             ))}

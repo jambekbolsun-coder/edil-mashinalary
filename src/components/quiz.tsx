@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, Check, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 const steps = [
   { question: "Для какой работы нужна техника?", options: ["Склад и хозяйство", "Стройка", "Карьер", "Земляные работы"] },
@@ -16,6 +16,7 @@ export function Quiz() {
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<string[]>([]);
+  const dialogRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     if (window.localStorage.getItem("edil-quiz-seen")) return;
@@ -23,10 +24,47 @@ export function Quiz() {
     return () => window.clearTimeout(timer);
   }, []);
 
-  const close = () => {
+  const close = useCallback(() => {
     setOpen(false);
     window.localStorage.setItem("edil-quiz-seen", "1");
-  };
+  }, []);
+
+  useEffect(() => {
+    if (!open) return;
+    const previouslyFocused = document.activeElement as HTMLElement | null;
+    document.body.classList.add("modal-open");
+    const timer = window.setTimeout(() => {
+      dialogRef.current?.querySelector<HTMLElement>("button, a[href]")?.focus();
+    }, 80);
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        close();
+        return;
+      }
+      if (event.key !== "Tab") return;
+      const focusable = dialogRef.current?.querySelectorAll<HTMLElement>(
+        "button:not([disabled]), a[href], [tabindex]:not([tabindex='-1'])",
+      );
+      if (!focusable?.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      window.clearTimeout(timer);
+      window.removeEventListener("keydown", onKeyDown);
+      document.body.classList.remove("modal-open");
+      if (previouslyFocused?.isConnected) previouslyFocused.focus();
+    };
+  }, [close, open]);
 
   const choose = (answer: string) => {
     setAnswers((current) => [...current.slice(0, step), answer]);
@@ -38,7 +76,7 @@ export function Quiz() {
   const complete = step >= steps.length;
   return (
     <div className="quiz-overlay" role="presentation" onMouseDown={close}>
-      <section className="quiz" role="dialog" aria-modal="true" aria-labelledby="quiz-title" onMouseDown={(event) => event.stopPropagation()}>
+      <section ref={dialogRef} className="quiz" role="dialog" aria-modal="true" aria-labelledby="quiz-title" onMouseDown={(event) => event.stopPropagation()}>
         <div className="quiz-visual">
           <Image src="/images/hero-warehouse.png" alt="Фронтальный погрузчик на складе Edil Mashinalary" fill sizes="(max-width: 760px) 100vw, 42vw" />
           <span>Подбор за 60 секунд</span>
@@ -50,12 +88,12 @@ export function Quiz() {
           </div>
           {!complete ? (
             <>
-              <span className="eyebrow">ШАГ {step + 1} ИЗ {steps.length}</span>
+              <div className="quiz-meta"><span>Подбор техники</span><b aria-hidden="true">0{step + 1} / 0{steps.length}</b></div>
               <h2 id="quiz-title">{steps[step].question}</h2>
               <div className="quiz-options">
-                {steps[step].options.map((option) => (
+                {steps[step].options.map((option, index) => (
                   <button key={option} onClick={() => choose(option)}>
-                    <span>{option}</span><ArrowRight aria-hidden="true" />
+                    <i aria-hidden="true">0{index + 1}</i><span>{option}</span><ArrowRight aria-hidden="true" />
                   </button>
                 ))}
               </div>

@@ -17,20 +17,41 @@ type SearchModalProps = {
 export function SearchModal({ open, onClose, products }: SearchModalProps) {
   const [query, setQuery] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
+  const dialogRef = useRef<HTMLElement>(null);
   const { t } = useLanguage();
 
   useEffect(() => {
     if (!open) return;
+    const previouslyFocused = document.activeElement as HTMLElement | null;
     document.body.classList.add("modal-open");
     const timer = window.setTimeout(() => inputRef.current?.focus(), 80);
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
+      if (event.key === "Escape") {
+        event.preventDefault();
+        onClose();
+        return;
+      }
+      if (event.key !== "Tab") return;
+      const focusable = dialogRef.current?.querySelectorAll<HTMLElement>(
+        "button:not([disabled]), a[href], input:not([disabled]), [tabindex]:not([tabindex='-1'])",
+      );
+      if (!focusable?.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     };
     window.addEventListener("keydown", onKeyDown);
     return () => {
       window.clearTimeout(timer);
       window.removeEventListener("keydown", onKeyDown);
       document.body.classList.remove("modal-open");
+      if (previouslyFocused?.isConnected) previouslyFocused.focus();
     };
   }, [open, onClose]);
 
@@ -61,6 +82,7 @@ export function SearchModal({ open, onClose, products }: SearchModalProps) {
   return (
     <div className="search-overlay" role="presentation" onMouseDown={onClose}>
       <section
+        ref={dialogRef}
         className="search-panel"
         role="dialog"
         aria-modal="true"
@@ -69,7 +91,7 @@ export function SearchModal({ open, onClose, products }: SearchModalProps) {
       >
         <div className="search-panel-head">
           <div>
-            <span className="eyebrow">EDIL SEARCH</span>
+            <span className="eyebrow">КАТАЛОГ ТЕХНИКИ</span>
             <h2 id="search-title">{t("search")}</h2>
           </div>
           <button className="icon-button" onClick={onClose} aria-label={t("close")}>
@@ -87,6 +109,10 @@ export function SearchModal({ open, onClose, products }: SearchModalProps) {
             autoComplete="off"
           />
         </label>
+        <div className="search-result-summary">
+          <span>{query ? `Результатов: ${results.length}` : "Популярные модели"}</span>
+          <kbd>ESC</kbd>
+        </div>
         <div className="search-results" aria-live="polite">
           {results.length === 0 ? (
             <div className="search-empty">
