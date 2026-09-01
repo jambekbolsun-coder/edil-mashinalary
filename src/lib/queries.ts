@@ -5,36 +5,27 @@ import { blogPosts, equipment as seedEquipment } from "@/lib/content";
 import type { BlogPost, Equipment } from "@/lib/types";
 import { hasSupabaseEnv } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
+import type { Database, Json } from "@/lib/supabase/database.types";
 
-type EquipmentRow = {
-  id: string;
-  slug: string;
-  name: string;
-  brand: string;
-  category: Equipment["category"];
-  status: Equipment["status"];
-  published: boolean;
-  featured: boolean;
-  price: number | null;
-  old_price: number | null;
-  down_payment: number | null;
-  monthly_payment: number | null;
-  installment_months: number;
-  bucket: string | null;
-  load_capacity: string | null;
-  power: number | null;
-  engine: string | null;
-  cylinders: number | null;
-  turbo: boolean | null;
-  warranty_hours: number;
-  promo: string | null;
-  short_description: string;
-  description: string;
-  images: string[];
-  specs: Equipment["specs"];
-  equipment: string[];
-  keywords: string[];
-};
+type EquipmentRow = Database["public"]["Tables"]["equipment"]["Row"];
+
+function stringArray(value: Json): string[] {
+  return Array.isArray(value)
+    ? value.filter((item): item is string => typeof item === "string")
+    : [];
+}
+
+function specArray(value: Json): Equipment["specs"] {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap((item) => {
+    if (!item || typeof item !== "object" || Array.isArray(item)) return [];
+    const label = item.label;
+    const specValue = item.value;
+    return typeof label === "string" && typeof specValue === "string"
+      ? [{ label, value: specValue }]
+      : [];
+  });
+}
 
 function mapEquipment(row: EquipmentRow): Equipment {
   return {
@@ -42,8 +33,8 @@ function mapEquipment(row: EquipmentRow): Equipment {
     slug: row.slug,
     name: row.name,
     brand: row.brand,
-    category: row.category,
-    status: row.status,
+    category: row.category as Equipment["category"],
+    status: row.status as Equipment["status"],
     published: row.published,
     featured: row.featured,
     price: row.price,
@@ -61,10 +52,10 @@ function mapEquipment(row: EquipmentRow): Equipment {
     promo: row.promo,
     shortDescription: row.short_description,
     description: row.description,
-    images: row.images,
-    specs: row.specs,
-    equipment: row.equipment,
-    keywords: row.keywords,
+    images: stringArray(row.images),
+    specs: specArray(row.specs),
+    equipment: stringArray(row.equipment),
+    keywords: stringArray(row.keywords),
   };
 }
 
@@ -78,7 +69,7 @@ export async function getPublishedEquipment(): Promise<Equipment[]> {
     .order("featured", { ascending: false })
     .order("created_at", { ascending: false });
   if (error || !data?.length) return seedEquipment.filter((item) => item.published);
-  const remote = (data as EquipmentRow[]).map(mapEquipment);
+  const remote = data.map(mapEquipment);
   const remoteSlugs = new Set(remote.map((item) => item.slug));
   return [...remote, ...seedEquipment.filter((item) => item.published && !remoteSlugs.has(item.slug))];
 }
@@ -87,7 +78,7 @@ export const getEquipmentItem = cache(async (slug: string): Promise<Equipment | 
   if (!hasSupabaseEnv()) return seedEquipment.find((item) => item.slug === slug && item.published);
   const supabase = await createClient();
   const { data } = await supabase.from("equipment").select("*").eq("slug", slug).eq("published", true).maybeSingle();
-  return data ? mapEquipment(data as EquipmentRow) : seedEquipment.find((item) => item.slug === slug && item.published);
+  return data ? mapEquipment(data) : seedEquipment.find((item) => item.slug === slug && item.published);
 });
 
 export async function getBlogPosts(): Promise<BlogPost[]> {

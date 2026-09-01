@@ -28,7 +28,7 @@ revoke all on function private.is_admin() from public;
 grant usage on schema private to authenticated;
 grant execute on function private.is_admin() to authenticated;
 
-create or replace function public.handle_new_user()
+create or replace function private.handle_new_user()
 returns trigger
 language plpgsql
 security definer
@@ -42,9 +42,11 @@ begin
 end;
 $$;
 
+revoke all on function private.handle_new_user() from public, anon, authenticated;
+
 create trigger on_auth_user_created
   after insert on auth.users
-  for each row execute procedure public.handle_new_user();
+  for each row execute procedure private.handle_new_user();
 
 create table public.equipment (
   id uuid primary key default gen_random_uuid(),
@@ -88,6 +90,7 @@ create table public.leads (
   preference text not null default 'whatsapp',
   interest text,
   comment text,
+  consent boolean not null default false,
   source text not null default 'website',
   status text not null default 'new' check (status in ('new', 'in-progress', 'won', 'lost')),
   created_at timestamptz not null default now(),
@@ -178,28 +181,42 @@ alter table public.analytics_events enable row level security;
 alter table public.site_settings enable row level security;
 
 create policy "Users can read own profile" on public.profiles for select to authenticated using (id = (select auth.uid()) or (select private.is_admin()));
-create policy "Admins manage profiles" on public.profiles for all to authenticated using ((select private.is_admin())) with check ((select private.is_admin()));
+create policy "Admins insert profiles" on public.profiles for insert to authenticated with check ((select private.is_admin()));
+create policy "Admins update profiles" on public.profiles for update to authenticated using ((select private.is_admin())) with check ((select private.is_admin()));
+create policy "Admins delete profiles" on public.profiles for delete to authenticated using ((select private.is_admin()));
 
 create policy "Anyone reads published equipment" on public.equipment for select to anon, authenticated using (published = true or (select private.is_admin()));
-create policy "Admins manage equipment" on public.equipment for all to authenticated using ((select private.is_admin())) with check ((select private.is_admin()));
+create policy "Admins insert equipment" on public.equipment for insert to authenticated with check ((select private.is_admin()));
+create policy "Admins update equipment" on public.equipment for update to authenticated using ((select private.is_admin())) with check ((select private.is_admin()));
+create policy "Admins delete equipment" on public.equipment for delete to authenticated using ((select private.is_admin()));
 
 create policy "Anyone creates leads" on public.leads for insert to anon, authenticated with check (true);
-create policy "Admins manage leads" on public.leads for all to authenticated using ((select private.is_admin())) with check ((select private.is_admin()));
+create policy "Admins read leads" on public.leads for select to authenticated using ((select private.is_admin()));
+create policy "Admins update leads" on public.leads for update to authenticated using ((select private.is_admin())) with check ((select private.is_admin()));
+create policy "Admins delete leads" on public.leads for delete to authenticated using ((select private.is_admin()));
 
 create policy "Anyone reads active chat answers" on public.chat_answers for select to anon, authenticated using (active = true or (select private.is_admin()));
-create policy "Admins manage chat answers" on public.chat_answers for all to authenticated using ((select private.is_admin())) with check ((select private.is_admin()));
+create policy "Admins insert chat answers" on public.chat_answers for insert to authenticated with check ((select private.is_admin()));
+create policy "Admins update chat answers" on public.chat_answers for update to authenticated using ((select private.is_admin())) with check ((select private.is_admin()));
+create policy "Admins delete chat answers" on public.chat_answers for delete to authenticated using ((select private.is_admin()));
 
 create policy "Anyone reads published posts" on public.posts for select to anon, authenticated using (published = true or (select private.is_admin()));
-create policy "Admins manage posts" on public.posts for all to authenticated using ((select private.is_admin())) with check ((select private.is_admin()));
+create policy "Admins insert posts" on public.posts for insert to authenticated with check ((select private.is_admin()));
+create policy "Admins update posts" on public.posts for update to authenticated using ((select private.is_admin())) with check ((select private.is_admin()));
+create policy "Admins delete posts" on public.posts for delete to authenticated using ((select private.is_admin()));
 
 create policy "Anyone reads active promotions" on public.promotions for select to anon, authenticated using (active = true or (select private.is_admin()));
-create policy "Admins manage promotions" on public.promotions for all to authenticated using ((select private.is_admin())) with check ((select private.is_admin()));
+create policy "Admins insert promotions" on public.promotions for insert to authenticated with check ((select private.is_admin()));
+create policy "Admins update promotions" on public.promotions for update to authenticated using ((select private.is_admin())) with check ((select private.is_admin()));
+create policy "Admins delete promotions" on public.promotions for delete to authenticated using ((select private.is_admin()));
 
 create policy "Anyone creates analytics" on public.analytics_events for insert to anon, authenticated with check (true);
 create policy "Admins read analytics" on public.analytics_events for select to authenticated using ((select private.is_admin()));
 
 create policy "Anyone reads public settings" on public.site_settings for select to anon, authenticated using (public = true or (select private.is_admin()));
-create policy "Admins manage settings" on public.site_settings for all to authenticated using ((select private.is_admin())) with check ((select private.is_admin()));
+create policy "Admins insert settings" on public.site_settings for insert to authenticated with check ((select private.is_admin()));
+create policy "Admins update settings" on public.site_settings for update to authenticated using ((select private.is_admin())) with check ((select private.is_admin()));
+create policy "Admins delete settings" on public.site_settings for delete to authenticated using ((select private.is_admin()));
 
 grant select on public.equipment, public.chat_answers, public.posts, public.promotions, public.site_settings to anon, authenticated;
 grant insert on public.leads, public.analytics_events to anon, authenticated;

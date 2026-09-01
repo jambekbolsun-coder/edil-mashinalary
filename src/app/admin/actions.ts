@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
 import { hasSupabaseEnv } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
+import type { Database } from "@/lib/supabase/database.types";
 import { equipmentSchema } from "@/lib/validation";
 
 function optionalNumber(value: FormDataEntryValue | null) {
@@ -94,7 +95,7 @@ export async function updateEquipmentAction(formData: FormData) {
     const { error } = await supabase.storage.from("equipment").upload(path, file, { contentType: file.type });
     if (!error) imageUrls.push(supabase.storage.from("equipment").getPublicUrl(path).data.publicUrl);
   }
-  const update: Record<string, unknown> = {
+  const update: Database["public"]["Tables"]["equipment"]["Update"] = {
     ...parsed.data, short_description: String(formData.get("short_description") ?? "").trim(), old_price: optionalNumber(formData.get("old_price")),
     down_payment: optionalNumber(formData.get("down_payment")), monthly_payment: optionalNumber(formData.get("monthly_payment")),
     installment_months: optionalNumber(formData.get("installment_months")) ?? 12, bucket: String(formData.get("bucket") ?? "").trim() || null,
