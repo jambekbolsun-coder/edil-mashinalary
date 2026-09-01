@@ -30,6 +30,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const { slug } = await params;
   const [product, allProducts] = await Promise.all([getEquipmentItem(slug), getPublishedEquipment()]);
   if (!product) notFound();
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://edil-mashinalary.vercel.app";
   const recommended = allProducts.filter((item) => item.slug !== product.slug && item.category === product.category).slice(0, 3);
   const productJsonLd = {
     "@context": "https://schema.org",
@@ -39,8 +40,17 @@ export default async function ProductPage({ params }: ProductPageProps) {
     description: product.shortDescription,
     brand: { "@type": "Brand", name: product.brand },
     offers: product.price
-      ? { "@type": "Offer", priceCurrency: "KGS", price: product.price, availability: product.status === "in-stock" ? "https://schema.org/InStock" : "https://schema.org/PreOrder" }
+      ? { "@type": "Offer", url: `${siteUrl}/catalog/${product.slug}`, priceCurrency: "KGS", price: product.price, availability: product.status === "in-stock" ? "https://schema.org/InStock" : "https://schema.org/PreOrder" }
       : undefined,
+  };
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Главная", item: siteUrl },
+      { "@type": "ListItem", position: 2, name: "Каталог", item: `${siteUrl}/catalog` },
+      { "@type": "ListItem", position: 3, name: `${product.brand} ${product.name}`, item: `${siteUrl}/catalog/${product.slug}` },
+    ],
   };
 
   return (
@@ -86,6 +96,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
       {recommended.length > 0 && <section className="section recommended-section"><div className="container"><div className="section-heading"><span className="eyebrow">ПОХОЖИЕ МОДЕЛИ</span><h2>Ещё техника этого класса</h2></div><div className="product-grid">{recommended.map((item) => <ProductCard key={item.id} product={item} />)}</div></div></section>}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd).replace(/</g, "\\u003c") }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd).replace(/</g, "\\u003c") }} />
     </main>
   );
 }
