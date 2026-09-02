@@ -12,7 +12,7 @@ export function ProductGallery({ images, name }: { images: string[]; name: strin
   return (
     <div className="product-gallery">
       <div className="gallery-main">
-        <Image src={images[active]} alt={`${name}, фото ${active + 1}`} fill priority sizes="(max-width: 900px) 100vw, 58vw" />
+        <Image src={images[active]} alt={`${name}, фото ${active + 1}`} fill loading="eager" fetchPriority="high" sizes="(max-width: 900px) 100vw, 58vw" />
         {images.length > 1 && (
           <div className="gallery-arrows">
             <button onClick={previous} aria-label="Предыдущее фото"><ChevronLeft aria-hidden="true" /></button>

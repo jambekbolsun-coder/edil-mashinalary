@@ -103,7 +103,7 @@ export function SiteHeader() {
             <button className="header-icon" onClick={() => setSearchOpen(true)} aria-label={t("search")}>
               <Search aria-hidden="true" />
             </button>
-            <div className="language-menu" ref={languageMenuRef}>
+            <div className="language-menu" ref={languageMenuRef} data-no-translate>
               <button
                 ref={languageTriggerRef}
                 className="language-trigger"
@@ -183,7 +183,7 @@ export function SiteHeader() {
               </Link>
             ))}
           </nav>
-          <div className="mobile-language-list" aria-label={t("language")}>
+          <div className="mobile-language-list" aria-label={t("language")} data-no-translate>
             {locales.map((item) => (
               <button
                 key={item}

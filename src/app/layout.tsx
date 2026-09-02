@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Manrope, Oswald } from "next/font/google";
 import { LanguageProvider } from "@/components/providers/language-provider";
+import "lenis/dist/lenis.css";
 import "./globals.css";
 import "./premium.css";
 

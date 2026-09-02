@@ -83,7 +83,14 @@ export function Quiz() {
         </div>
         <div className="quiz-content">
           <button className="icon-button quiz-close" onClick={close} aria-label="Закрыть квиз"><X aria-hidden="true" /></button>
-          <div className="quiz-progress" aria-label={`Шаг ${Math.min(step + 1, steps.length)} из ${steps.length}`}>
+          <div
+            className="quiz-progress"
+            role="progressbar"
+            aria-label={`Шаг ${Math.min(step + 1, steps.length)} из ${steps.length}`}
+            aria-valuemin={1}
+            aria-valuemax={steps.length}
+            aria-valuenow={Math.min(step + 1, steps.length)}
+          >
             <span style={{ width: `${(Math.min(step + 1, steps.length) / steps.length) * 100}%` }} />
           </div>
           {!complete ? (

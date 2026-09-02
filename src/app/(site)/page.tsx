@@ -51,7 +51,7 @@ export default async function HomePage() {
       <section className="section finance-home">
         <div className="container">
           <Reveal className="finance-intro">
-            <span className="eyebrow">РАССРОЧКА БЕЗ БАНКА</span><h2>Паспорт.<br />Первый взнос.<br />Техника ваша.</h2>
+            <div><span className="eyebrow">РАССРОЧКА БЕЗ БАНКА</span><h2>Паспорт.<br />Первый взнос.<br />Техника ваша.</h2></div>
             <div><p>Внесите примерно от 50% стоимости, а остаток разделите на срок до 12 месяцев. Без банковских анкет и скрытых комиссий.</p><Link href="/finance" className="button">Рассчитать платёж <ArrowRight aria-hidden="true" /></Link></div>
           </Reveal>
           <div className="finance-steps">

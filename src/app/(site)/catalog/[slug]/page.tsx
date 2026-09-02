@@ -5,6 +5,7 @@ import { ArrowUpRight, BadgeCheck, Check, MessageCircle, ShieldCheck } from "luc
 import { LeadForm } from "@/components/lead-form";
 import { ProductCard } from "@/components/product-card";
 import { ProductGallery } from "@/components/product-gallery";
+import { WhatsAppRequestModal } from "@/components/whatsapp-request-modal";
 import { categoryLabels, company, equipment as seedEquipment, formatPrice } from "@/lib/content";
 import { getEquipmentItem, getPublishedEquipment } from "@/lib/queries";
 
@@ -74,7 +75,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
             </div>
             <div className="product-actions">
               <a className="button" href={`${company.whatsapp}?text=${encodeURIComponent(`Здравствуйте! Интересует ${product.brand} ${product.name}.`)}`} target="_blank" rel="noreferrer"><MessageCircle aria-hidden="true" />Написать в WhatsApp</a>
-              <a className="button button-outline" href="#request">Оставить заявку <ArrowUpRight aria-hidden="true" /></a>
+              <WhatsAppRequestModal brand={product.brand} name={product.name} slug={product.slug} />
             </div>
             <div className="product-guarantees"><span><ShieldCheck aria-hidden="true" />Гарантия {product.warrantyHours} моточасов</span><span><BadgeCheck aria-hidden="true" />Прямой договор</span></div>
           </div>

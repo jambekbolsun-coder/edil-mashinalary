@@ -43,7 +43,7 @@ export function HeroCarousel() {
       <div className="hero-slides">
         {slides.map((slide, index) => (
           <div className="hero-slide" data-active={active === index} key={slide.image} aria-hidden={active !== index}>
-            <Image src={slide.image} alt="" fill priority={index === 0} sizes="100vw" />
+            <Image src={slide.image} alt="" fill loading="eager" fetchPriority={index === 0 ? "high" : "auto"} sizes="100vw" />
           </div>
         ))}
       </div>
