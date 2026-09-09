@@ -23,6 +23,15 @@ export async function POST(request: Request) {
       comment: payload.comment,
       consent: payload.consent,
       source: payload.source,
+      locale: payload.locale,
+      landing_page: payload.landingPage || null,
+      utm_source: payload.utmSource || null,
+      utm_medium: payload.utmMedium || null,
+      utm_campaign: payload.utmCampaign || null,
+      utm_content: payload.utmContent || null,
+      utm_term: payload.utmTerm || null,
+      consent_version: "2026-09-09",
+      consented_at: new Date().toISOString(),
     });
     if (error) throw error;
     return Response.json({ success: true }, { status: 201 });

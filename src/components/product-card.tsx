@@ -19,6 +19,7 @@ export function ProductCard({ product, priority = false }: { product: Equipment;
           alt={`${product.brand} ${product.name}`}
           fill
           priority={priority}
+          quality={88}
           sizes="(max-width: 680px) 100vw, (max-width: 1100px) 50vw, 33vw"
         />
         {product.images[1] && (
@@ -27,6 +28,7 @@ export function ProductCard({ product, priority = false }: { product: Equipment;
             src={product.images[1]}
             alt=""
             fill
+            quality={88}
             sizes="(max-width: 680px) 100vw, (max-width: 1100px) 50vw, 33vw"
           />
         )}

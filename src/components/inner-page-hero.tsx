@@ -12,7 +12,7 @@ type InnerPageHeroProps = {
 export function InnerPageHero({ eyebrow, title, text, image, current }: InnerPageHeroProps) {
   return (
     <section className="inner-hero page-hero">
-      <Image src={image} alt="" fill priority sizes="100vw" />
+      <Image src={image} alt="" fill preload quality={90} sizes="100vw" />
       <div className="inner-hero-shade" />
       <div className="container inner-hero-content">
         <nav className="breadcrumbs" aria-label="Хлебные крошки"><Link href="/">Главная</Link><span>/</span><span>{current}</span></nav>

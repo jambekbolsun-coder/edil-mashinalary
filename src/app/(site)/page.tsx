@@ -5,11 +5,10 @@ import { HeroCarousel } from "@/components/hero-carousel";
 import { LeadForm } from "@/components/lead-form";
 import { ProductCard } from "@/components/product-card";
 import { Reveal } from "@/components/reveal";
-import { blogPosts } from "@/lib/content";
-import { getPublishedEquipment } from "@/lib/queries";
+import { getBlogPosts, getPublishedEquipment } from "@/lib/queries";
 
 export default async function HomePage() {
-  const products = await getPublishedEquipment();
+  const [products, blogPosts] = await Promise.all([getPublishedEquipment(), getBlogPosts()]);
   const featured = products.filter((product) => product.featured).slice(0, 6);
 
   return (
@@ -31,16 +30,16 @@ export default async function HomePage() {
       <section className="section value-section">
         <div className="container value-layout">
           <Reveal className="value-image">
-            <Image src="/images/hero-warehouse.png" alt="Спецтехника готова к выдаче со склада" fill sizes="(max-width: 900px) 100vw, 52vw" />
-            <div className="value-image-caption"><strong>01:00</strong><span>может занять выдача техники со склада</span></div>
+            <Image src="/images/hero-warehouse.png" alt="Спецтехника на площадке Edil Mashinalary" fill quality={90} sizes="(max-width: 900px) 100vw, 52vw" />
+            <div className="value-image-caption"><strong>10+</strong><span>моделей представлено в каталоге</span></div>
           </Reveal>
           <div className="value-copy">
             <span className="eyebrow light">ПОЧЕМУ EDIL</span><h2>Сильная техника.<br />Понятная сделка.</h2>
             <p>Помогаем выбрать рабочую модель, заранее объясняем платежи и остаёмся на связи после передачи техники.</p>
             <div className="value-points">
-              <article><BadgeCheck aria-hidden="true" /><strong>Официальная поставка</strong><span>Техника и документы без серых схем</span></article>
-              <article><WalletCards aria-hidden="true" /><strong>Без банка</strong><span>Паспорт и прямой договор рассрочки</span></article>
-              <article><ShieldCheck aria-hidden="true" /><strong>3000 моточасов</strong><span>Гарантия, если не указано другое</span></article>
+              <article><BadgeCheck aria-hidden="true" /><strong>Комплектация</strong><span>Фиксируется для выбранной машины</span></article>
+              <article><WalletCards aria-hidden="true" /><strong>Условия платежей</strong><span>Подтверждаются до подписания договора</span></article>
+              <article><ShieldCheck aria-hidden="true" /><strong>Гарантия</strong><span>Срок и покрытие указываются в договоре</span></article>
               <article><Headphones aria-hidden="true" /><strong>После покупки</strong><span>Консультация, сервис и запчасти</span></article>
             </div>
             <Link href="/about" className="button button-light">Узнать о компании <ArrowUpRight aria-hidden="true" /></Link>
@@ -57,16 +56,16 @@ export default async function HomePage() {
           <div className="finance-steps">
             <article><span>01</span><ClipboardCheck aria-hidden="true" /><h3>Выберите модель</h3><p>Сравним ковш, мощность и задачи.</p></article>
             <article><span>02</span><PackageCheck aria-hidden="true" /><h3>Внесите первый взнос</h3><p>Для оформления достаточно паспорта.</p></article>
-            <article><span>03</span><Clock3 aria-hidden="true" /><h3>Заберите технику</h3><p>При наличии выдача занимает около часа.</p></article>
+            <article><span>03</span><Clock3 aria-hidden="true" /><h3>Согласуйте передачу</h3><p>Менеджер подтвердит наличие, документы и удобное время.</p></article>
           </div>
         </div>
       </section>
 
       <section className="service-preview">
-        <Image src="/images/hero-service.png" alt="Сервис спецтехники Edil Mashinalary" fill sizes="100vw" /><div className="service-preview-shade" />
+        <Image src="/images/hero-service.png" alt="Сервис спецтехники Edil Mashinalary" fill quality={90} sizes="100vw" /><div className="service-preview-shade" />
         <div className="container service-preview-content">
           <span className="eyebrow light">СЕРВИС И ГАРАНТИЯ</span><h2>Техника работает.<br />Мы остаёмся рядом.</h2>
-          <div className="service-preview-points"><span><Wrench aria-hidden="true" />Техническая консультация</span><span><Cog aria-hidden="true" />Расходники и запчасти</span><span><ShieldCheck aria-hidden="true" />Гарантия 3000 моточасов</span></div>
+          <div className="service-preview-points"><span><Wrench aria-hidden="true" />Техническая консультация</span><span><Cog aria-hidden="true" />Расходники и запчасти</span><span><ShieldCheck aria-hidden="true" />Условия гарантии по договору</span></div>
           <Link href="/service" className="button">Подробнее о сервисе <ArrowUpRight aria-hidden="true" /></Link>
         </div>
       </section>

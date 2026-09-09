@@ -1,7 +1,7 @@
 import "server-only";
 
 import { cache } from "react";
-import { blogPosts, equipment as seedEquipment } from "@/lib/content";
+import { blogPosts, company, equipment as seedEquipment } from "@/lib/content";
 import type { BlogPost, Equipment } from "@/lib/types";
 import { hasSupabaseEnv } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
@@ -82,7 +82,58 @@ export const getEquipmentItem = cache(async (slug: string): Promise<Equipment | 
 });
 
 export async function getBlogPosts(): Promise<BlogPost[]> {
-  return blogPosts;
+  if (!hasSupabaseEnv()) return blogPosts;
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("posts").select("*").eq("published", true).order("published_at", { ascending: false });
+  if (error || !data?.length) return blogPosts;
+  const remote: BlogPost[] = data.map((post) => ({ slug: post.slug, title: post.title, excerpt: post.excerpt, category: post.category, readTime: post.read_time, image: post.image, publishedAt: post.published_at || post.created_at, content: stringArray(post.content) }));
+  const slugs = new Set(remote.map((post) => post.slug));
+  return [...remote, ...blogPosts.filter((post) => !slugs.has(post.slug))];
+}
+
+export const getBlogPost = cache(async (slug: string) => (await getBlogPosts()).find((post) => post.slug === slug));
+
+export type ServiceItem = { id: string; slug: string; title: string; excerpt: string; icon: string };
+
+const seedServices: ServiceItem[] = [
+  { id: "service-warranty", slug: "warranty", title: "Условия гарантии", excerpt: "Точные сроки и объём покрытия фиксируются для конкретной модели в договоре.", icon: "shield" },
+  { id: "service-consultation", slug: "consultation", title: "Техническая консультация", excerpt: "Поможем разобраться с эксплуатацией и базовым обслуживанием.", icon: "wrench" },
+  { id: "service-parts", slug: "parts", title: "Расходники и запчасти", excerpt: "Подберём позицию по модели и данным конкретной машины.", icon: "package" },
+  { id: "service-operation", slug: "operation", title: "Помощь с эксплуатацией", excerpt: "Ответим на вопросы оператора и владельца после покупки.", icon: "headphones" },
+];
+
+export async function getServices(): Promise<ServiceItem[]> {
+  if (!hasSupabaseEnv()) return seedServices;
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("services").select("id,slug,title,excerpt,icon").eq("published", true).order("sort_order");
+  return error || !data?.length ? seedServices : data;
+}
+
+export type CompanyInfo = typeof company;
+
+function formatPhone(value: string) {
+  const digits = value.replace(/\D/g, "");
+  const match = digits.match(/^(996)(\d{3})(\d{3})(\d{3})$/);
+  return match ? `+${match[1]} ${match[2]} ${match[3]} ${match[4]}` : value;
+}
+
+export async function getCompanyInfo(): Promise<CompanyInfo> {
+  if (!hasSupabaseEnv()) return company;
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("site_settings").select("key,value").in("key", ["company_name", "company_phone", "company_email", "company_address", "company_whatsapp", "company_instagram"]);
+  if (error || !data) return company;
+  const settings = new Map(data.map((item) => [item.key, typeof item.value === "string" ? item.value : ""]));
+  const phoneDisplay = formatPhone(settings.get("company_phone") || company.phoneDisplay);
+  return {
+    ...company,
+    name: settings.get("company_name") || company.name,
+    phoneDisplay,
+    phone: phoneDisplay.replace(/[^+\d]/g, ""),
+    email: settings.get("company_email") || company.email,
+    address: settings.get("company_address") || company.address,
+    whatsapp: settings.get("company_whatsapp") || company.whatsapp,
+    instagram: settings.get("company_instagram") || company.instagram,
+  } as CompanyInfo;
 }
 
 const seedChatAnswers: [string, string][] = [

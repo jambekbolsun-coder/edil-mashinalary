@@ -1,14 +1,25 @@
 "use client";
 
 import { CheckCircle2, LoaderCircle, Send } from "lucide-react";
-import { useState } from "react";
+import Link from "next/link";
+import { useRef, useState } from "react";
 import { equipment } from "@/lib/content";
+import { trackEvent } from "@/lib/analytics-client";
+import { useLanguage } from "@/components/providers/language-provider";
 
 type FormStatus = "idle" | "loading" | "success" | "error";
 
 export function LeadForm({ source = "site", compact = false }: { source?: string; compact?: boolean }) {
   const [status, setStatus] = useState<FormStatus>("idle");
   const [error, setError] = useState("");
+  const started = useRef(false);
+  const { locale } = useLanguage();
+
+  function startTracking() {
+    if (started.current) return;
+    started.current = true;
+    void trackEvent("form_started", { form: source });
+  }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -18,14 +29,27 @@ export function LeadForm({ source = "site", compact = false }: { source?: string
     const formData = new FormData(form);
     const payload = Object.fromEntries(formData.entries());
     try {
+      const url = new URL(window.location.href);
       const response = await fetch("/api/leads", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...payload, consent: formData.get("consent") === "on", source }),
+        body: JSON.stringify({
+          ...payload,
+          consent: formData.get("consent") === "on",
+          source,
+          locale,
+          landingPage: `${url.pathname}${url.search}`,
+          utmSource: url.searchParams.get("utm_source") || "",
+          utmMedium: url.searchParams.get("utm_medium") || "",
+          utmCampaign: url.searchParams.get("utm_campaign") || "",
+          utmContent: url.searchParams.get("utm_content") || "",
+          utmTerm: url.searchParams.get("utm_term") || "",
+        }),
       });
       const result = (await response.json()) as { success?: boolean; error?: string };
       if (!response.ok || !result.success) throw new Error(result.error || "Не удалось отправить заявку");
       setStatus("success");
+      void trackEvent("form_submitted", { form: source });
       form.reset();
     } catch (submitError) {
       setStatus("error");
@@ -45,7 +69,7 @@ export function LeadForm({ source = "site", compact = false }: { source?: string
   }
 
   return (
-    <form className={`lead-form ${compact ? "compact" : ""}`} onSubmit={handleSubmit} noValidate>
+    <form className={`lead-form ${compact ? "compact" : ""}`} onSubmit={handleSubmit} onFocusCapture={startTracking}>
       {status === "error" && <div className="form-error" role="alert" tabIndex={-1}>{error}</div>}
       <div className="field-grid">
         <label>
@@ -80,7 +104,7 @@ export function LeadForm({ source = "site", compact = false }: { source?: string
       </label>
       <label className="consent-field">
         <input type="checkbox" name="consent" required />
-        <span>Согласен на обработку контактных данных *</span>
+        <span>Согласен на <Link href="/personal-data-consent" target="_blank">обработку контактных данных</Link> и ознакомлен с <Link href="/privacy" target="_blank">политикой конфиденциальности</Link> *</span>
       </label>
       <button className="button" disabled={status === "loading"} type="submit">
         {status === "loading" ? <LoaderCircle className="spin" aria-hidden="true" /> : <Send aria-hidden="true" />}

@@ -15,15 +15,15 @@ const slides = [
   },
   {
     image: "/images/hero-warehouse.png",
-    eyebrow: "Быстрая выдача со склада",
-    title: "Оформили. Проверили. Забрали за час.",
-    text: "Если модель в наличии, подготовим документы и передачу техники без долгой бюрократии.",
+    eyebrow: "Техника со склада и под заказ",
+    title: "Проверили. Согласовали. Передали.",
+    text: "Менеджер подтвердит наличие, комплектацию, документы и согласует время передачи техники.",
   },
   {
     image: "/images/hero-service.png",
     eyebrow: "Сервис и гарантия",
     title: "Остаёмся рядом после покупки",
-    text: "Гарантия 3000 моточасов, консультация по эксплуатации, расходникам и запчастям.",
+    text: "Консультация по эксплуатации, условиям гарантии, расходникам и запчастям для конкретной модели.",
   },
 ];
 
@@ -43,7 +43,7 @@ export function HeroCarousel() {
       <div className="hero-slides">
         {slides.map((slide, index) => (
           <div className="hero-slide" data-active={active === index} key={slide.image} aria-hidden={active !== index}>
-            <Image src={slide.image} alt="" fill loading="eager" fetchPriority={index === 0 ? "high" : "auto"} sizes="100vw" />
+            <Image src={slide.image} alt="" fill loading="eager" quality={90} fetchPriority={index === 0 ? "high" : "auto"} sizes="100vw" />
           </div>
         ))}
       </div>
@@ -64,8 +64,8 @@ export function HeroCarousel() {
         </div>
         <dl className="hero-stats">
           <div><dt>01</dt><dd><strong>{t("models")}</strong><span>в каталоге</span></dd></div>
-          <div><dt>02</dt><dd><strong>{t("oneHour")}</strong><span>для техники на складе</span></dd></div>
-          <div><dt>03</dt><dd><strong>{t("warranty")}</strong><span>гарантия</span></dd></div>
+          <div><dt>02</dt><dd><strong>{t("oneHour")}</strong><span>формат поставки</span></dd></div>
+          <div><dt>03</dt><dd><strong>{t("warranty")}</strong><span>для выбранной модели</span></dd></div>
         </dl>
         <div className="hero-controls">
           <div className="hero-dots">

@@ -11,7 +11,7 @@ const oswald = Oswald({ variable: "--font-display", subsets: ["latin", "cyrillic
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://edil-mashinalary.vercel.app"),
   title: { default: "Спецтехника в Кыргызстане | Edil Mashinalary", template: "%s | Edil Mashinalary" },
-  description: "Погрузчики LGZT, экскаваторы, самосвалы и другая спецтехника в Кыргызстане. Рассрочка без банка, гарантия 3000 моточасов.",
+  description: "Погрузчики LGZT, экскаваторы, самосвалы и другая спецтехника в Кыргызстане. Каталог, условия покупки и поддержка.",
   keywords: ["спецтехника Кыргызстан", "LGZT Кыргызстан", "купить погрузчик Кыргызстан", "погрузчик Бишкек", "спецтехника в рассрочку", "HOWO Кыргызстан"],
   alternates: { canonical: "/" },
   openGraph: {
@@ -19,8 +19,8 @@ export const metadata: Metadata = {
     locale: "ru_KG",
     siteName: "Edil Mashinalary",
     title: "Спецтехника в Кыргызстане | Edil Mashinalary",
-    description: "Техника со склада и под заказ. Рассрочка без банка и гарантия 3000 моточасов.",
-    images: [{ url: "/images/hero-fleet.png", width: 2048, height: 1152, alt: "Парк спецтехники Edil Mashinalary" }],
+    description: "Техника со склада и под заказ. Подбор модели, условия покупки и поддержка после передачи.",
+    images: [{ url: "/images/hero-fleet.png", width: 1672, height: 941, alt: "Парк спецтехники Edil Mashinalary" }],
   },
   twitter: { card: "summary_large_image" },
 };

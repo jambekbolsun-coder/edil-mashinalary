@@ -52,6 +52,7 @@ export type BlogPost = {
   readTime: string;
   image: string;
   publishedAt: string;
+  content?: string[];
 };
 
 export type LeadPayload = {

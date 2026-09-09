@@ -5,6 +5,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useLanguage } from "@/components/providers/language-provider";
 import { company } from "@/lib/content";
 import type { Locale } from "@/lib/types";
+import Link from "next/link";
+import { trackEvent } from "@/lib/analytics-client";
 
 type Props = {
   brand: string;
@@ -73,6 +75,7 @@ export function WhatsAppRequestModal({ brand, name, slug }: Props) {
     setError("");
 
     try {
+      const url = new URL(window.location.href);
       const response = await fetch("/api/leads", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -84,11 +87,19 @@ export function WhatsAppRequestModal({ brand, name, slug }: Props) {
           preference: "whatsapp",
           consent: true,
           source: `whatsapp-modal:${slug}`,
+          locale,
+          landingPage: `${url.pathname}${url.search}`,
+          utmSource: url.searchParams.get("utm_source") || "",
+          utmMedium: url.searchParams.get("utm_medium") || "",
+          utmCampaign: url.searchParams.get("utm_campaign") || "",
+          utmContent: url.searchParams.get("utm_content") || "",
+          utmTerm: url.searchParams.get("utm_term") || "",
         }),
       });
       const result = (await response.json()) as { success?: boolean; error?: string };
       if (!response.ok || !result.success) throw new Error(result.error || "Не удалось сохранить заявку");
       const message = messageCopy[locale]({ brand, name, customer, phone, comment });
+      void trackEvent("form_submitted", { form: "whatsapp_request", equipment: slug });
       const whatsappLink = document.createElement("a");
       whatsappLink.href = `${company.whatsapp}?text=${encodeURIComponent(message)}`;
       whatsappLink.rel = "noreferrer";
@@ -101,7 +112,7 @@ export function WhatsAppRequestModal({ brand, name, slug }: Props) {
 
   return (
     <>
-      <button className="button button-outline" type="button" onClick={() => setOpen(true)}>
+      <button className="button button-outline" type="button" onClick={() => { setOpen(true); void trackEvent("form_started", { form: "whatsapp_request", equipment: slug }); }}>
         Отправить заявку <ArrowUpRight aria-hidden="true" />
       </button>
       {open && (
@@ -119,7 +130,7 @@ export function WhatsAppRequestModal({ brand, name, slug }: Props) {
                 <label><span>Телефон *</span><input name="phone" type="tel" inputMode="tel" autoComplete="tel" pattern="[+0-9()\-\s]{9,20}" required placeholder="+996 ___ ___ ___" /></label>
               </div>
               <label><span>Что должна делать техника?</span><textarea name="comment" rows={3} maxLength={600} placeholder="Коротко опишите задачу или задайте вопрос" /></label>
-              <label className="consent-field"><input type="checkbox" required defaultChecked /><span>Согласен на обработку контактных данных *</span></label>
+              <label className="consent-field"><input type="checkbox" required /><span>Согласен на <Link href="/personal-data-consent" target="_blank">обработку контактных данных</Link> и <Link href="/privacy" target="_blank">политику конфиденциальности</Link> *</span></label>
               <button className="button request-modal-submit" type="submit" disabled={sending}>
                 {sending ? <LoaderCircle className="spin" aria-hidden="true" /> : <Send aria-hidden="true" />}
                 {sending ? "Готовим WhatsApp…" : "Отправить и перейти в WhatsApp"}

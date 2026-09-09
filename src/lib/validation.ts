@@ -13,6 +13,13 @@ export const leadSchema = z.object({
   comment: z.string().trim().max(1200, "Комментарий слишком длинный").default(""),
   consent: z.literal(true, { error: "Нужно согласие на обработку данных" }),
   source: z.string().trim().max(120).default("site"),
+  locale: z.enum(["ru", "ky", "en", "tr", "zh"]).default("ru"),
+  landingPage: z.string().trim().max(500).default(""),
+  utmSource: z.string().trim().max(120).default(""),
+  utmMedium: z.string().trim().max(120).default(""),
+  utmCampaign: z.string().trim().max(120).default(""),
+  utmContent: z.string().trim().max(120).default(""),
+  utmTerm: z.string().trim().max(120).default(""),
 });
 
 export const equipmentSchema = z.object({

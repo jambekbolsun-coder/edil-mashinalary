@@ -16,28 +16,49 @@ export type Database = {
     Tables: {
       analytics_events: {
         Row: {
+          anonymous_id: string | null
           created_at: string
           equipment_slug: string | null
           event_name: string
           id: number
+          locale: string | null
           metadata: Json
           path: string | null
+          referrer_host: string | null
+          session_id: string | null
+          utm_campaign: string | null
+          utm_medium: string | null
+          utm_source: string | null
         }
         Insert: {
+          anonymous_id?: string | null
           created_at?: string
           equipment_slug?: string | null
           event_name: string
           id?: never
+          locale?: string | null
           metadata?: Json
           path?: string | null
+          referrer_host?: string | null
+          session_id?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
         }
         Update: {
+          anonymous_id?: string | null
           created_at?: string
           equipment_slug?: string | null
           event_name?: string
           id?: never
+          locale?: string | null
           metadata?: Json
           path?: string | null
+          referrer_host?: string | null
+          session_id?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
         }
         Relationships: []
       }
@@ -171,41 +192,74 @@ export type Database = {
         Row: {
           comment: string | null
           consent: boolean
+          consent_version: string
+          consented_at: string | null
           created_at: string
           id: string
           interest: string | null
+          landing_page: string | null
+          locale: string
+          manager_notes: string | null
           name: string
+          next_contact_at: string | null
           phone: string
           preference: string
           source: string
           status: string
           updated_at: string
+          utm_campaign: string | null
+          utm_content: string | null
+          utm_medium: string | null
+          utm_source: string | null
+          utm_term: string | null
         }
         Insert: {
           comment?: string | null
           consent?: boolean
+          consent_version?: string
+          consented_at?: string | null
           created_at?: string
           id?: string
           interest?: string | null
+          landing_page?: string | null
+          locale?: string
+          manager_notes?: string | null
           name: string
+          next_contact_at?: string | null
           phone: string
           preference?: string
           source?: string
           status?: string
           updated_at?: string
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
         }
         Update: {
           comment?: string | null
           consent?: boolean
+          consent_version?: string
+          consented_at?: string | null
           created_at?: string
           id?: string
           interest?: string | null
+          landing_page?: string | null
+          locale?: string
+          manager_notes?: string | null
           name?: string
+          next_contact_at?: string | null
           phone?: string
           preference?: string
           source?: string
           status?: string
           updated_at?: string
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
         }
         Relationships: []
       }
@@ -309,6 +363,24 @@ export type Database = {
           title?: string
           updated_at?: string
         }
+        Relationships: []
+      }
+      services: {
+        Row: { id: string; slug: string; title: string; excerpt: string; content: Json; icon: string; sort_order: number; published: boolean; created_at: string; updated_at: string }
+        Insert: { id?: string; slug: string; title: string; excerpt: string; content?: Json; icon?: string; sort_order?: number; published?: boolean; created_at?: string; updated_at?: string }
+        Update: { id?: string; slug?: string; title?: string; excerpt?: string; content?: Json; icon?: string; sort_order?: number; published?: boolean; created_at?: string; updated_at?: string }
+        Relationships: []
+      }
+      lead_activities: {
+        Row: { id: number; lead_id: string; author_id: string | null; activity_type: string; note: string | null; metadata: Json; created_at: string }
+        Insert: { id?: never; lead_id: string; author_id?: string | null; activity_type: string; note?: string | null; metadata?: Json; created_at?: string }
+        Update: { id?: never; lead_id?: string; author_id?: string | null; activity_type?: string; note?: string | null; metadata?: Json; created_at?: string }
+        Relationships: []
+      }
+      audit_logs: {
+        Row: { id: number; actor_id: string | null; action: string; entity_type: string; entity_id: string | null; changes: Json; created_at: string }
+        Insert: { id?: never; actor_id?: string | null; action: string; entity_type: string; entity_id?: string | null; changes?: Json; created_at?: string }
+        Update: { id?: never; actor_id?: string | null; action?: string; entity_type?: string; entity_id?: string | null; changes?: Json; created_at?: string }
         Relationships: []
       }
       site_settings: {
@@ -470,4 +542,3 @@ export const Constants = {
     Enums: {},
   },
 } as const
-

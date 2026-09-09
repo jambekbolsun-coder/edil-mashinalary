@@ -119,11 +119,104 @@ export async function deleteEquipmentAction(formData: FormData) {
 }
 
 export async function updateLeadStatusAction(formData: FormData) {
-  const { supabase } = await requireAdmin();
+  const { supabase, profile } = await requireAdmin();
   const status = String(formData.get("status") ?? "new");
   if (!["new", "in-progress", "won", "lost"].includes(status)) return;
-  await supabase.from("leads").update({ status }).eq("id", String(formData.get("id") ?? ""));
+  const id = String(formData.get("id") ?? "");
+  const note = String(formData.get("manager_notes") ?? "").trim().slice(0, 2000);
+  await supabase.from("leads").update({ status, manager_notes: note || null }).eq("id", id);
+  await supabase.from("lead_activities").insert({ lead_id: id, author_id: profile.id, activity_type: "status_changed", note: note || null, metadata: { status } });
   revalidatePath("/admin/leads");
+}
+
+export async function createPostAction(formData: FormData) {
+  const { supabase, profile } = await requireAdmin();
+  const title = String(formData.get("title") ?? "").trim();
+  const slug = String(formData.get("slug") ?? "").trim().toLowerCase();
+  const excerpt = String(formData.get("excerpt") ?? "").trim();
+  const paragraphs = String(formData.get("content") ?? "").split(/\n{2,}/).map((item) => item.trim()).filter(Boolean);
+  if (title.length < 3 || excerpt.length < 10 || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) || !paragraphs.length) redirect("/admin/content?error=post-validation");
+  const { data, error } = await supabase.from("posts").insert({ title, slug, excerpt, content: paragraphs, category: String(formData.get("category") ?? "Практика").trim(), read_time: String(formData.get("read_time") ?? "5 минут").trim(), image: String(formData.get("image") ?? "/images/products/heavy-site.jpg").trim(), published: formData.get("published") === "on", published_at: formData.get("published") === "on" ? new Date().toISOString() : null }).select("id").single();
+  if (error) redirect(`/admin/content?error=${encodeURIComponent(error.code ?? "post")}`);
+  await supabase.from("audit_logs").insert({ actor_id: profile.id, action: "post_created", entity_type: "post", entity_id: data.id, changes: { title, published: formData.get("published") === "on" } });
+  revalidatePath("/"); revalidatePath("/blog"); revalidatePath("/admin/content");
+  redirect("/admin/content?created=post");
+}
+
+export async function deletePostAction(formData: FormData) {
+  const { supabase, profile } = await requireAdmin();
+  const id = String(formData.get("id") ?? "");
+  await supabase.from("posts").delete().eq("id", id);
+  await supabase.from("audit_logs").insert({ actor_id: profile.id, action: "post_deleted", entity_type: "post", entity_id: id });
+  revalidatePath("/"); revalidatePath("/blog"); revalidatePath("/admin/content");
+}
+
+export async function updatePostAction(formData: FormData) {
+  const { supabase, profile } = await requireAdmin();
+  const id = String(formData.get("id") ?? "");
+  const title = String(formData.get("title") ?? "").trim();
+  const excerpt = String(formData.get("excerpt") ?? "").trim();
+  const published = formData.get("published") === "on";
+  if (!id || title.length < 3 || excerpt.length < 10) redirect("/admin/content?error=post-validation");
+  const { error } = await supabase.from("posts").update({ title, excerpt, published, published_at: published ? new Date().toISOString() : null }).eq("id", id);
+  if (error) redirect("/admin/content?error=post-update");
+  await supabase.from("audit_logs").insert({ actor_id: profile.id, action: "post_updated", entity_type: "post", entity_id: id, changes: { title, published } });
+  revalidatePath("/"); revalidatePath("/blog"); revalidatePath("/admin/content");
+  redirect("/admin/content?updated=post");
+}
+
+export async function createServiceAction(formData: FormData) {
+  const { supabase, profile } = await requireAdmin();
+  const title = String(formData.get("title") ?? "").trim();
+  const slug = String(formData.get("slug") ?? "").trim().toLowerCase();
+  const excerpt = String(formData.get("excerpt") ?? "").trim();
+  if (title.length < 2 || excerpt.length < 10 || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) redirect("/admin/content?error=service-validation");
+  const { data, error } = await supabase.from("services").insert({ title, slug, excerpt, content: [], icon: String(formData.get("icon") ?? "wrench"), sort_order: optionalNumber(formData.get("sort_order")) ?? 0, published: formData.get("published") === "on" }).select("id").single();
+  if (error) redirect(`/admin/content?error=${encodeURIComponent(error.code ?? "service")}`);
+  await supabase.from("audit_logs").insert({ actor_id: profile.id, action: "service_created", entity_type: "service", entity_id: data.id, changes: { title } });
+  revalidatePath("/service"); revalidatePath("/admin/content");
+  redirect("/admin/content?created=service");
+}
+
+export async function deleteServiceAction(formData: FormData) {
+  const { supabase, profile } = await requireAdmin();
+  const id = String(formData.get("id") ?? "");
+  await supabase.from("services").delete().eq("id", id);
+  await supabase.from("audit_logs").insert({ actor_id: profile.id, action: "service_deleted", entity_type: "service", entity_id: id });
+  revalidatePath("/service"); revalidatePath("/admin/content");
+}
+
+export async function updateServiceAction(formData: FormData) {
+  const { supabase, profile } = await requireAdmin();
+  const id = String(formData.get("id") ?? "");
+  const title = String(formData.get("title") ?? "").trim();
+  const excerpt = String(formData.get("excerpt") ?? "").trim();
+  const sortOrder = optionalNumber(formData.get("sort_order")) ?? 0;
+  const published = formData.get("published") === "on";
+  if (!id || title.length < 2 || excerpt.length < 10) redirect("/admin/content?error=service-validation");
+  const { error } = await supabase.from("services").update({ title, excerpt, sort_order: sortOrder, published }).eq("id", id);
+  if (error) redirect("/admin/content?error=service-update");
+  await supabase.from("audit_logs").insert({ actor_id: profile.id, action: "service_updated", entity_type: "service", entity_id: id, changes: { title, published, sort_order: sortOrder } });
+  revalidatePath("/service"); revalidatePath("/admin/content");
+  redirect("/admin/content?updated=service");
+}
+
+export async function updateSettingsAction(formData: FormData) {
+  const { supabase, profile } = await requireAdmin();
+  const settings = [
+    ["company_name", String(formData.get("company_name") ?? "").trim()],
+    ["company_phone", String(formData.get("company_phone") ?? "").trim()],
+    ["company_email", String(formData.get("company_email") ?? "").trim()],
+    ["company_address", String(formData.get("company_address") ?? "").trim()],
+    ["company_whatsapp", String(formData.get("company_whatsapp") ?? "").trim()],
+    ["company_instagram", String(formData.get("company_instagram") ?? "").trim()],
+  ].filter(([, value]) => value.length > 0).map(([key, value]) => ({ key, value, public: true }));
+  if (settings.length < 6) redirect("/admin/settings?error=validation");
+  const { error } = await supabase.from("site_settings").upsert(settings);
+  if (error) redirect("/admin/settings?error=database");
+  await supabase.from("audit_logs").insert({ actor_id: profile.id, action: "settings_updated", entity_type: "site_settings", changes: { keys: settings.map((item) => item.key) } });
+  revalidatePath("/", "layout");
+  redirect("/admin/settings?saved=1");
 }
 
 export async function createChatAnswerAction(formData: FormData) {

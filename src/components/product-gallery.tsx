@@ -12,7 +12,7 @@ export function ProductGallery({ images, name }: { images: string[]; name: strin
   return (
     <div className="product-gallery">
       <div className="gallery-main">
-        <Image src={images[active]} alt={`${name}, фото ${active + 1}`} fill loading="eager" fetchPriority="high" sizes="(max-width: 900px) 100vw, 58vw" />
+        <Image src={images[active]} alt={`${name}, фото ${active + 1}`} fill loading="eager" quality={90} fetchPriority="high" sizes="(max-width: 900px) 100vw, 58vw" />
         {images.length > 1 && (
           <div className="gallery-arrows">
             <button onClick={previous} aria-label="Предыдущее фото"><ChevronLeft aria-hidden="true" /></button>
@@ -24,7 +24,7 @@ export function ProductGallery({ images, name }: { images: string[]; name: strin
       <div className="gallery-thumbnails">
         {images.map((image, index) => (
           <button key={image} className={active === index ? "active" : undefined} onClick={() => setActive(index)} aria-label={`Показать фото ${index + 1}`}>
-            <Image src={image} alt="" fill sizes="112px" />
+            <Image src={image} alt="" fill quality={84} sizes="112px" />
           </button>
         ))}
       </div>

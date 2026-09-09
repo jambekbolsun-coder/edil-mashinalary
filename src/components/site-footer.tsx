@@ -5,9 +5,10 @@ import Link from "next/link";
 import { ArrowUpRight, Camera, MapPin, MessageCircle, Phone } from "lucide-react";
 import { Logo } from "@/components/ui/logo";
 import { company } from "@/lib/content";
+import type { CompanyInfo } from "@/lib/queries";
 import { useLanguage } from "@/components/providers/language-provider";
 
-export function SiteFooter() {
+export function SiteFooter({ companyInfo = company }: { companyInfo?: CompanyInfo }) {
   const { t } = useLanguage();
 
   return (
@@ -35,15 +36,15 @@ export function SiteFooter() {
           <Link href="/blog">{t("blog")}</Link>
         </nav>
         <div className="footer-contacts">
-          <a href={`tel:${company.phone}`}><Phone aria-hidden="true" />{company.phoneDisplay}</a>
-          <a href={company.whatsapp} target="_blank" rel="noreferrer"><MessageCircle aria-hidden="true" />WhatsApp</a>
-          <a href={company.instagram} target="_blank" rel="noreferrer"><Camera aria-hidden="true" />Instagram</a>
-          <a href={company.map} target="_blank" rel="noreferrer"><MapPin aria-hidden="true" />Новопокровка, ул. Ленина, 633</a>
+          <a href={`tel:${companyInfo.phone}`}><Phone aria-hidden="true" />{companyInfo.phoneDisplay}</a>
+          <a href={companyInfo.whatsapp} target="_blank" rel="noreferrer"><MessageCircle aria-hidden="true" />WhatsApp</a>
+          <a href={companyInfo.instagram} target="_blank" rel="noreferrer"><Camera aria-hidden="true" />Instagram</a>
+          <a href={companyInfo.map} target="_blank" rel="noreferrer"><MapPin aria-hidden="true" />{companyInfo.address}</a>
         </div>
       </div>
       <div className="footer-bottom container">
         <span>© 2026 Edil Mashinalary</span>
-        <span>Спецтехника в Кыргызстане</span>
+        <nav className="footer-legal" aria-label="Юридическая информация"><Link href="/privacy">Конфиденциальность</Link><Link href="/cookies">Cookie</Link><Link href="/terms">Условия</Link><Link href="/personal-data-consent">Согласие на данные</Link></nav>
         <Link href="/admin/login">Вход для администратора</Link>
       </div>
     </footer>
