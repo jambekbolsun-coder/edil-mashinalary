@@ -4,6 +4,7 @@ import { LanguageProvider } from "@/components/providers/language-provider";
 import "lenis/dist/lenis.css";
 import "./globals.css";
 import "./premium.css";
+import "./refinements.css";
 
 const manrope = Manrope({ variable: "--font-body", subsets: ["latin", "cyrillic"], display: "swap" });
 const oswald = Oswald({ variable: "--font-display", subsets: ["latin", "cyrillic"], display: "swap" });

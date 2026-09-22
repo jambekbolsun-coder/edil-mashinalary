@@ -65,7 +65,7 @@ export async function createEquipmentAction(formData: FormData) {
     images: imageUrls.length ? imageUrls : ["/images/hero-fleet.png"], specs: [], equipment, keywords,
   });
   if (error) redirect(`/admin/catalog/new?error=${encodeURIComponent(error.code ?? "database")}`);
-  revalidatePath("/catalog"); revalidatePath("/admin/catalog");
+  revalidatePath("/"); revalidatePath("/catalog"); revalidatePath("/catalog/[slug]", "page"); revalidatePath("/admin/catalog");
   redirect("/admin/catalog?created=1");
 }
 
@@ -73,8 +73,10 @@ export async function toggleEquipmentAction(formData: FormData) {
   const { supabase } = await requireAdmin();
   const id = String(formData.get("id") ?? "");
   const published = formData.get("published") === "true";
-  await supabase.from("equipment").update({ published: !published }).eq("id", id);
-  revalidatePath("/catalog"); revalidatePath("/admin/catalog");
+  const { error } = await supabase.from("equipment").update({ published: !published }).eq("id", id);
+  if (error) redirect("/admin/catalog?error=publication");
+  revalidatePath("/", "layout");
+  revalidatePath("/"); revalidatePath("/catalog"); revalidatePath("/catalog/[slug]", "page"); revalidatePath("/admin/catalog");
 }
 
 export async function updateEquipmentAction(formData: FormData) {
@@ -108,25 +110,16 @@ export async function updateEquipmentAction(formData: FormData) {
   if (imageUrls.length) update.images = imageUrls;
   const { error } = await supabase.from("equipment").update(update).eq("id", id);
   if (error) redirect(`/admin/catalog/${id}/edit?error=${encodeURIComponent(error.code ?? "database")}`);
-  revalidatePath("/catalog"); revalidatePath(`/catalog/${parsed.data.slug}`); revalidatePath("/admin/catalog");
+  revalidatePath("/"); revalidatePath("/catalog"); revalidatePath("/catalog/[slug]", "page"); revalidatePath(`/catalog/${parsed.data.slug}`); revalidatePath("/admin/catalog");
   redirect("/admin/catalog?updated=1");
 }
 
 export async function deleteEquipmentAction(formData: FormData) {
   const { supabase } = await requireAdmin();
-  await supabase.from("equipment").delete().eq("id", String(formData.get("id") ?? ""));
-  revalidatePath("/catalog"); revalidatePath("/admin/catalog");
-}
-
-export async function updateLeadStatusAction(formData: FormData) {
-  const { supabase, profile } = await requireAdmin();
-  const status = String(formData.get("status") ?? "new");
-  if (!["new", "in-progress", "won", "lost"].includes(status)) return;
-  const id = String(formData.get("id") ?? "");
-  const note = String(formData.get("manager_notes") ?? "").trim().slice(0, 2000);
-  await supabase.from("leads").update({ status, manager_notes: note || null }).eq("id", id);
-  await supabase.from("lead_activities").insert({ lead_id: id, author_id: profile.id, activity_type: "status_changed", note: note || null, metadata: { status } });
-  revalidatePath("/admin/leads");
+  const { error } = await supabase.from("equipment").delete().eq("id", String(formData.get("id") ?? ""));
+  if (error) redirect("/admin/catalog?error=delete");
+  revalidatePath("/", "layout");
+  revalidatePath("/"); revalidatePath("/catalog"); revalidatePath("/catalog/[slug]", "page"); revalidatePath("/admin/catalog");
 }
 
 export async function createPostAction(formData: FormData) {

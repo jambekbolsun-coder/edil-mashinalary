@@ -7,7 +7,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Logo } from "@/components/ui/logo";
 import { Flag } from "@/components/ui/flag";
 import { SearchModal } from "@/components/search-modal";
-import { company, equipment } from "@/lib/content";
+import { company } from "@/lib/content";
+import { useCatalog } from "@/components/providers/catalog-provider";
 import { localeNames } from "@/lib/i18n";
 import type { Locale } from "@/lib/types";
 import { useLanguage } from "@/components/providers/language-provider";
@@ -24,6 +25,7 @@ const navItems = [
 const locales: Locale[] = ["ky", "ru", "en", "tr", "zh"];
 
 export function SiteHeader() {
+  const equipment = useCatalog();
   const pathname = usePathname();
   const { locale, setLocale, t } = useLanguage();
   const [scrolled, setScrolled] = useState(pathname !== "/");

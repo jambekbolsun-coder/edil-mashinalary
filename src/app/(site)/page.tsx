@@ -1,3 +1,4 @@
+import { MachineryGallery } from "@/components/machinery-gallery";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, ArrowUpRight, BadgeCheck, ClipboardCheck, Clock3, Cog, Headphones, PackageCheck, ShieldCheck, WalletCards, Wrench } from "lucide-react";
@@ -30,7 +31,7 @@ export default async function HomePage() {
       <section className="section value-section">
         <div className="container value-layout">
           <Reveal className="value-image">
-            <Image src="/images/hero-warehouse.png" alt="Спецтехника на площадке Edil Mashinalary" fill quality={90} sizes="(max-width: 900px) 100vw, 52vw" />
+            <Image src="/images/scenes/15-fleet.webp" alt="Иллюстрация: погрузчики LGZT на фоне гор" fill quality={90} sizes="(max-width: 900px) 100vw, 52vw" />
             <div className="value-image-caption"><strong>10+</strong><span>моделей представлено в каталоге</span></div>
           </Reveal>
           <div className="value-copy">
@@ -62,7 +63,7 @@ export default async function HomePage() {
       </section>
 
       <section className="service-preview">
-        <Image src="/images/hero-service.png" alt="Сервис спецтехники Edil Mashinalary" fill quality={90} sizes="100vw" /><div className="service-preview-shade" />
+        <Image src="/images/scenes/18-service.webp" alt="Сервис спецтехники Edil Mashinalary" fill quality={90} sizes="100vw" /><div className="service-preview-shade" />
         <div className="container service-preview-content">
           <span className="eyebrow light">СЕРВИС И ГАРАНТИЯ</span><h2>Техника работает.<br />Мы остаёмся рядом.</h2>
           <div className="service-preview-points"><span><Wrench aria-hidden="true" />Техническая консультация</span><span><Cog aria-hidden="true" />Расходники и запчасти</span><span><ShieldCheck aria-hidden="true" />Условия гарантии по договору</span></div>
@@ -86,6 +87,8 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      <MachineryGallery />
 
       <section className="section lead-section">
         <div className="container lead-layout">

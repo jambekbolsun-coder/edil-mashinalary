@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { equipmentCategories } from "./categories";
 
 export const leadSchema = z.object({
   name: z.string().trim().min(2, "Укажите имя").max(90, "Имя слишком длинное"),
@@ -26,7 +27,7 @@ export const equipmentSchema = z.object({
   name: z.string().trim().min(2).max(100),
   slug: z.string().trim().min(2).max(100).regex(/^[a-z0-9-]+$/),
   brand: z.string().trim().min(1).max(80),
-  category: z.enum(["loaders", "excavators", "dump-trucks", "mixers", "attachments"]),
+  category: z.enum(equipmentCategories),
   status: z.enum(["in-stock", "on-order"]),
   description: z.string().trim().min(20).max(5000),
   price: z.number().int().nonnegative().nullable(),

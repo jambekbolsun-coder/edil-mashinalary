@@ -5,11 +5,14 @@ import Link from "next/link";
 import { ArrowUpRight, Gauge, PackageOpen, ShieldCheck } from "lucide-react";
 import { categoryLabels, formatPrice } from "@/lib/content";
 import type { Equipment } from "@/lib/types";
+import { getLoaderScene } from "@/lib/machinery-scenes";
 import { useLanguage } from "@/components/providers/language-provider";
 
 export function ProductCard({ product, priority = false }: { product: Equipment; priority?: boolean }) {
   const { t } = useLanguage();
   const saving = product.price && product.oldPrice ? product.oldPrice - product.price : null;
+  const scene = product.brand === "LGZT" ? getLoaderScene(product.slug) : undefined;
+  const secondary = scene || product.images[1];
 
   return (
     <article className="product-card">
@@ -22,10 +25,10 @@ export function ProductCard({ product, priority = false }: { product: Equipment;
           quality={88}
           sizes="(max-width: 680px) 100vw, (max-width: 1100px) 50vw, 33vw"
         />
-        {product.images[1] && (
+        {secondary && (
           <Image
             className="product-image-secondary"
-            src={product.images[1]}
+            src={secondary}
             alt=""
             fill
             quality={88}
@@ -36,6 +39,7 @@ export function ProductCard({ product, priority = false }: { product: Equipment;
           {product.status === "in-stock" ? t("inStock") : t("onOrder")}
         </span>
         {product.promo && <span className="promo-badge">{product.promo}</span>}
+        {scene && <span className="product-scene-label">Иллюстрация работы · ИИ</span>}
       </Link>
       <div className="product-card-body">
         <div className="product-meta">
