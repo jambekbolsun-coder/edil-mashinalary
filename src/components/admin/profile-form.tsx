@@ -22,4 +22,3 @@ export function ProfileForm({ profile, avatarUrl }: { profile: { full_name: stri
     {state.error && <div className="admin-alert" role="alert">{state.error}</div>}{state.success && <div className="admin-success" role="status">Профиль сохранён</div>}<button className="button" disabled={pending || !!fileError}><Save aria-hidden="true" />{pending ? "Сохраняем…" : "Сохранить профиль"}</button></section>
   </form>;
 }
-

@@ -32,4 +32,3 @@ export async function updateProfileAction(_previous: ProfileState, formData: For
   revalidatePath("/admin", "layout");
   return { success: true };
 }
-

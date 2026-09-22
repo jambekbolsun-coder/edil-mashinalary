@@ -28,4 +28,3 @@ const loaderScenes: Record<string, string> = {
 export function getLoaderScene(slug: string) {
   return loaderScenes[slug] ? `/images/scenes/${loaderScenes[slug]}.webp` : undefined;
 }
-

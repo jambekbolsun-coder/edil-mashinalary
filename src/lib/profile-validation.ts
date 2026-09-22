@@ -11,4 +11,3 @@ export function avatarExtension(bytes: Uint8Array): "jpg" | "png" | "webp" | nul
   if (String.fromCharCode(...bytes.slice(0,4)) === "RIFF" && String.fromCharCode(...bytes.slice(8,12)) === "WEBP") return "webp";
   return null;
 }
-
