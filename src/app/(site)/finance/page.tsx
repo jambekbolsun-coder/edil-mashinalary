@@ -4,11 +4,13 @@ import { ArrowUpRight, BadgeCheck, Clock3, FileCheck2, Landmark, PackageCheck } 
 import { FinanceCalculator } from "@/components/finance-calculator";
 import { InnerPageHero } from "@/components/inner-page-hero";
 import { LeadForm } from "@/components/lead-form";
-import { equipment, formatPrice } from "@/lib/content";
+import { formatPrice } from "@/lib/content";
+import { getPublishedEquipment } from "@/lib/queries";
 
 export const metadata: Metadata = { title: "Условия рассрочки", description: "Предварительный расчёт рассрочки на спецтехнику в Кыргызстане. Финальные условия фиксируются в договоре.", alternates: { canonical: "/finance" } };
 
-export default function FinancePage() {
+export default async function FinancePage() {
+  const equipment = await getPublishedEquipment();
   const financed = equipment.filter((item) => item.price && item.monthlyPayment);
   return (
     <main>

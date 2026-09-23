@@ -3,13 +3,15 @@
 import { CheckCircle2, LoaderCircle, Send } from "lucide-react";
 import Link from "next/link";
 import { useRef, useState } from "react";
-import { equipment } from "@/lib/content";
+import { useCatalog } from "@/components/providers/catalog-provider";
 import { trackEvent } from "@/lib/analytics-client";
 import { useLanguage } from "@/components/providers/language-provider";
 
 type FormStatus = "idle" | "loading" | "success" | "error";
 
 export function LeadForm({ source = "site", compact = false }: { source?: string; compact?: boolean }) {
+  const equipment = useCatalog();
+  const defaultInterest = source.startsWith("product:") ? source.slice("product:".length) : "";
   const [status, setStatus] = useState<FormStatus>("idle");
   const [error, setError] = useState("");
   const started = useRef(false);
@@ -92,7 +94,7 @@ export function LeadForm({ source = "site", compact = false }: { source?: string
         )}
         <label>
           <span>Интересующая техника</span>
-          <select name="interest" defaultValue="">
+          <select name="interest" defaultValue={defaultInterest}>
             <option value="">Помогите выбрать</option>
             {equipment.map((item) => <option key={item.id} value={item.slug}>{item.brand} {item.name}</option>)}
           </select>

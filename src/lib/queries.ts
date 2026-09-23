@@ -59,7 +59,7 @@ function mapEquipment(row: EquipmentRow): Equipment {
   };
 }
 
-export async function getPublishedEquipment(): Promise<Equipment[]> {
+export const getPublishedEquipment = cache(async (): Promise<Equipment[]> => {
   if (!hasSupabaseEnv()) return seedEquipment.filter((item) => item.published);
   const supabase = await createClient();
   const { data, error } = await supabase
@@ -68,17 +68,16 @@ export async function getPublishedEquipment(): Promise<Equipment[]> {
     .eq("published", true)
     .order("featured", { ascending: false })
     .order("created_at", { ascending: false });
-  if (error || !data?.length) return seedEquipment.filter((item) => item.published);
-  const remote = data.map(mapEquipment);
-  const remoteSlugs = new Set(remote.map((item) => item.slug));
-  return [...remote, ...seedEquipment.filter((item) => item.published && !remoteSlugs.has(item.slug))];
-}
+  if (error) return seedEquipment.filter((item) => item.published);
+  return (data ?? []).map(mapEquipment);
+});
 
 export const getEquipmentItem = cache(async (slug: string): Promise<Equipment | undefined> => {
   if (!hasSupabaseEnv()) return seedEquipment.find((item) => item.slug === slug && item.published);
   const supabase = await createClient();
-  const { data } = await supabase.from("equipment").select("*").eq("slug", slug).eq("published", true).maybeSingle();
-  return data ? mapEquipment(data) : seedEquipment.find((item) => item.slug === slug && item.published);
+  const { data, error } = await supabase.from("equipment").select("*").eq("slug", slug).eq("published", true).maybeSingle();
+  if (error) return seedEquipment.find((item) => item.slug === slug && item.published);
+  return data ? mapEquipment(data) : undefined;
 });
 
 export async function getBlogPosts(): Promise<BlogPost[]> {

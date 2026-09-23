@@ -1,6 +1,7 @@
 "use client";
 
 import { Search, SlidersHorizontal, X } from "lucide-react";
+import { categoryLabels, equipmentCategories } from "@/lib/categories";
 import { useMemo, useState } from "react";
 import { ProductCard } from "@/components/product-card";
 import type { Equipment, EquipmentCategory, EquipmentStatus } from "@/lib/types";
@@ -10,18 +11,17 @@ type StatusFilter = "all" | EquipmentStatus;
 
 const categories: { value: CategoryFilter; label: string }[] = [
   { value: "all", label: "Все модели" },
-  { value: "loaders", label: "Фронтальные погрузчики" },
-  { value: "excavators", label: "Экскаваторы" },
-  { value: "dump-trucks", label: "Самосвалы" },
-  { value: "attachments", label: "Навесное" },
+  ...equipmentCategories.map((value) => ({ value, label: categoryLabels[value] })),
 ];
 
 export function CatalogClient({ products }: { products: Equipment[] }) {
+  const powerLimit = Math.max(200, ...products.map((product) => Math.ceil((product.power || 0) / 5) * 5));
+  const priceLimit = Math.max(4_000_000, ...products.map((product) => Math.ceil((product.price || 0) / 100_000) * 100_000));
   const [category, setCategory] = useState<CategoryFilter>("all");
   const [status, setStatus] = useState<StatusFilter>("all");
   const [query, setQuery] = useState("");
-  const [maxPower, setMaxPower] = useState(200);
-  const [maxPrice, setMaxPrice] = useState(4_000_000);
+  const [maxPower, setMaxPower] = useState(powerLimit);
+  const [maxPrice, setMaxPrice] = useState(priceLimit);
   const [sort, setSort] = useState("featured");
   const [filtersOpen, setFiltersOpen] = useState(false);
 
@@ -47,8 +47,8 @@ export function CatalogClient({ products }: { products: Equipment[] }) {
     setCategory("all");
     setStatus("all");
     setQuery("");
-    setMaxPower(200);
-    setMaxPrice(4_000_000);
+    setMaxPower(powerLimit);
+    setMaxPrice(priceLimit);
     setSort("featured");
   };
 
@@ -77,11 +77,11 @@ export function CatalogClient({ products }: { products: Equipment[] }) {
         </fieldset>
         <label className="range-field">
           <span>Мощность до <strong>{maxPower} л.с.</strong></span>
-          <input type="range" min="50" max="200" step="5" value={maxPower} onChange={(event) => setMaxPower(Number(event.target.value))} />
+          <input type="range" min="0" max={powerLimit} step="5" value={maxPower} onChange={(event) => setMaxPower(Number(event.target.value))} />
         </label>
         <label className="range-field">
           <span>Цена до <strong>{new Intl.NumberFormat("ru-RU").format(maxPrice)} сом</strong></span>
-          <input type="range" min="1_000_000" max="4_000_000" step="100000" value={maxPrice} onChange={(event) => setMaxPrice(Number(event.target.value))} />
+          <input type="range" min="0" max={priceLimit} step="100000" value={maxPrice} onChange={(event) => setMaxPrice(Number(event.target.value))} />
         </label>
         <button className="filter-reset" onClick={reset}>Сбросить фильтры</button>
         <button className="button filter-apply" onClick={() => setFiltersOpen(false)}>Показать {filtered.length}</button>

@@ -8,19 +8,19 @@ import { useLanguage } from "@/components/providers/language-provider";
 
 const slides = [
   {
-    image: "/images/hero-fleet.png",
+    image: "/images/scenes/01-mine.webp",
     eyebrow: "Парк техники в Кыргызстане",
     title: "Спецтехника, которая не ждёт сезона",
     text: "Погрузчики LGZT, HOWO и техника под вашу задачу. Часть моделей уже на складе.",
   },
   {
-    image: "/images/hero-warehouse.png",
+    image: "/images/scenes/02-valley.webp",
     eyebrow: "Техника со склада и под заказ",
     title: "Проверили. Согласовали. Передали.",
     text: "Менеджер подтвердит наличие, комплектацию, документы и согласует время передачи техники.",
   },
   {
-    image: "/images/hero-service.png",
+    image: "/images/scenes/03-mountain-road.webp",
     eyebrow: "Сервис и гарантия",
     title: "Остаёмся рядом после покупки",
     text: "Консультация по эксплуатации, условиям гарантии, расходникам и запчастям для конкретной модели.",

@@ -441,13 +441,7 @@ export const blogPosts: BlogPost[] = [
   },
 ];
 
-export const categoryLabels = {
-  loaders: "Фронтальные погрузчики",
-  excavators: "Экскаваторы",
-  "dump-trucks": "Самосвалы",
-  mixers: "Бетономешалки",
-  attachments: "Навесное оборудование",
-} as const;
+export { categoryLabels } from "./categories";
 
 export function formatPrice(value: number | null) {
   return value === null

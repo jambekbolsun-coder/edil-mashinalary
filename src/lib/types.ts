@@ -1,11 +1,6 @@
 export type Locale = "ky" | "ru" | "en" | "tr" | "zh";
 
-export type EquipmentCategory =
-  | "loaders"
-  | "excavators"
-  | "dump-trucks"
-  | "mixers"
-  | "attachments";
+export type EquipmentCategory = (typeof import("./categories").equipmentCategories)[number];
 
 export type EquipmentStatus = "in-stock" | "on-order";
 

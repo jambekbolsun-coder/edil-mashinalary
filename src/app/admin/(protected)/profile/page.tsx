@@ -1,7 +1,9 @@
-import { ShieldCheck } from "lucide-react";
 import { requireAdmin } from "@/lib/auth";
+import { ProfileForm } from "@/components/admin/profile-form";
 
 export default async function AdminProfilePage() {
-  const { profile } = await requireAdmin();
-  return <><header className="admin-page-head"><div><span className="eyebrow">АККАУНТ</span><h1>Профиль</h1><p>Данные текущего администратора и уровень доступа.</p></div></header><section className="admin-panel admin-settings"><div><span className="eyebrow">АДМИНИСТРАТОР</span><h2>{profile.full_name || "Владелец сайта"}</h2><p>Пароль хранится только в защищённой системе авторизации и никогда не попадает в исходный код.</p></div><dl><div><dt>Роль</dt><dd><ShieldCheck aria-hidden="true" /> Полный доступ</dd></div><div><dt>Идентификатор</dt><dd>{profile.id}</dd></div><div><dt>Безопасность</dt><dd>Проверка сессии на сервере</dd></div></dl></section></>;
+  const { supabase, profile } = await requireAdmin();
+  const { data, error } = await supabase.from("profiles").select("full_name,about,skills,avatar_path").eq("id", profile.id).single();
+  const signed = data?.avatar_path ? await supabase.storage.from("avatars").createSignedUrl(data.avatar_path, 3600) : null;
+  return <><header className="admin-page-head"><div><span className="eyebrow">АККАУНТ</span><h1>Профиль</h1><p>Фотография, навыки и несколько слов о себе.</p></div></header>{error || !data ? <div className="admin-alert" role="alert">Не удалось загрузить профиль. Попробуйте позже.</div> : <ProfileForm profile={data} avatarUrl={signed?.data?.signedUrl ?? null} />}</>;
 }
